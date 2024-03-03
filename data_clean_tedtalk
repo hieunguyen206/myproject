@@ -1,7 +1,5 @@
-Dataset: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m4!1m3!3m2!1shieu-la-bi!2skaggle_cleansed&authuser=1
-source of data: Source of the dataset: https://www.kaggle.com/datasets/ashishjangra27/ted-talks
-
-
+Source of the dataset: https://www.kaggle.com/datasets/ashishjangra27/ted-talks
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m4!1m3!3m2!1shieu-la-bi!2skaggle_cleansed&authuser=1
 
 WITH rename_column AS (
 SELECT 
