@@ -1,3 +1,14 @@
+Source of the dataset: https://www.kaggle.com/datasets/minhnguynphc/vietnamese-person-name
+
+CREATE OR REPLACE TABLE `vit-lam-data.kaggle.vietnamese_person_name_sample`
+  LIKE `vit-lam-data.kaggle.vietnamese_person_name`
+  AS (
+    SELECT * FROM `vit-lam-data.kaggle.vietnamese_person_name`
+    TABLESAMPLE SYSTEM (10 PERCENT)
+    ORDER BY 1
+  )
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m5!1m4!4m3!1shieu-la-bi!2skaggle_cleansed!3svietnamese_name_sample&authuser=1
+
 WITH cleanse_value AS (
 SELECT 
   REGEXP_REPLACE(INITCAP(TRIM(full_name)), r'\s+', ' ') AS full_name
