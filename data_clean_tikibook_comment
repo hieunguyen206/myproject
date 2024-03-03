@@ -1,0 +1,19 @@
+WITH rename_column AS (
+SELECT 
+  comment_id AS tiki_comment_id
+  , product_id AS tiki_product_id
+  , customer_id AS tiki_customer_id
+  , title AS comment_title
+  , content AS comment_content
+  , thank_count AS count_thanks 
+  , rating 
+FROM `vit-lam-data.kaggle_tiki_books.comments`
+)
+, deduplicate AS (
+SELECT DISTINCT *
+FROM rename_column 
+WHERE NOT (tiki_comment_id = 13350773 AND count_thanks = 0)
+)
+
+SELECT *
+FROM deduplicate
