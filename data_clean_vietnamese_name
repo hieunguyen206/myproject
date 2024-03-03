@@ -1,0 +1,26 @@
+WITH cleanse_value AS (
+SELECT 
+  REGEXP_REPLACE(INITCAP(TRIM(full_name)), r'\s+', ' ') AS full_name
+FROM `vit-lam-data.kaggle.vietnamese_person_name_sample`
+)
+, enrich AS (
+SELECT *
+  , LENGTH(full_name) - LENGTH(REPLACE(full_name, ' ', '')) + 1 AS count_words
+  -- Khúc này để tính số space, nếu có 2 space thì có 3 chữ, 1 space thì 2 chữ,.. 
+  , SPLIT(full_name, ' ') AS split_full_name
+FROM cleanse_value
+) 
+, enrich_name AS (
+SELECT *
+  , split_full_name[0] AS first_name
+  , split_full_name[count_words -1 ] AS last_name 
+  -- start từ index 0 giống python
+  , CASE 
+    WHEN count_words >2 THEN split_full_name[count_words - 2]
+    END AS last_middle_name
+FROM enrich
+)
+
+SELECT *
+  , CONCAT(last_middle_name,' ' , last_name) AS last_two_names
+FROM enrich_name 
