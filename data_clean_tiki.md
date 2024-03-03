@@ -1,3 +1,6 @@
+**Source of the dataset:** https://www.kaggle.com/datasets/biminhc/tiki-books-dataset
+**link Big querry:** https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m4!1m3!3m2!1shieu-la-bi!2skaggle_cleansed&authuser=1
+
 WITH rename_column AS (
 SELECT 
   product_id AS tiki_product_id
