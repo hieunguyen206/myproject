@@ -1,0 +1,61 @@
+WITH rename_colume AS (
+SELECT 
+  province
+  , date
+  , max AS max_temperature
+  , min AS min_temperature
+  , wind AS wind_speed_km_h
+  , wind_d AS wind_direction_sign 
+  , rain AS rain_amount_mm
+  , humidi AS humidity_percent
+  , cloud AS cloud_percent
+FROM `vit-lam-data.kaggle.vietnam_weather_data` 
+)
+, cast_type AS (
+SELECT *
+  EXCEPT(rain_amount_mm)
+  ,CAST(rain_amount_mm AS NUMERIC) AS rain_amount_mm
+FROM rename_colume
+)
+, remove_wrong_data AS (
+SELECT *
+FROM cast_type
+WHERE province <> 'Hanoi'
+) 
+, enrich AS (
+SELECT *
+  , CASE 
+  WHEN wind_direction_sign ='N' THEN 'North'	
+  WHEN wind_direction_sign ='NNE' THEN 'North-Northeast'	
+  WHEN wind_direction_sign ='NE' THEN 'Northeast'	
+  WHEN wind_direction_sign ='EN' THEN 'East-Northeast'	
+  WHEN wind_direction_sign ='E' THEN 'East'	
+  WHEN wind_direction_sign ='ESE'THEN 'East-Southeast'	
+  WHEN wind_direction_sign ='SE' THEN 'Southeast'	
+  WHEN wind_direction_sign ='SSE' THEN 'South-Southeast'	
+  WHEN wind_direction_sign ='S' THEN 'South'	
+  WHEN wind_direction_sign ='SSW' THEN 'South-Southwest'	
+  WHEN wind_direction_sign ='SW' THEN 'Southwest'	
+  WHEN wind_direction_sign ='WSW' THEN 'West-Southwest'	
+  WHEN wind_direction_sign ='W' THEN 'West'	
+  WHEN wind_direction_sign ='WNW' THEN 'West-Northwest'	
+  WHEN wind_direction_sign ='NW' THEN 'Northwest'	
+  WHEN wind_direction_sign ='NNW' THEN 'North-Northwest'
+  ELSE 'Unidentify'
+  END AS wind_direction	
+FROM remove_wrong_data
+)
+
+SELECT 
+  province
+  ,date
+  ,max_temperature
+  ,min_temperature
+  ,wind_speed_km_h
+  ,wind_direction_sign
+  ,wind_direction
+  ,rain_amount_mm
+  ,humidity_percent
+  ,cloud_percent
+FROM enrich
+ORDER BY 1,2
