@@ -1,0 +1,31 @@
+Original table: bigquery-public-data.hacker_news.full
+Doc: https://console.cloud.google.com/marketplace/product/y-combinator/hacker-news
+Link big query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m5!1m4!4m3!1shieu-la-bi!2spublic_data_cleansed!3shackernews&authuser=1
+
+WITH rename_column AS (
+SELECT 
+  id AS hackernews_id
+  ,`by` AS hackernew_user_id
+  ,type
+  ,`timestamp` AS posted_at
+  ,title AS story_title
+  ,url AS story_url
+  ,score AS story_score
+  ,text 
+  ,parent AS parent_comment_id
+  ,ranking AS comment_ranking
+  ,deleted AS is_deleted
+  ,dead AS is_dead
+FROM `vit-lam-data.public_data_sample.hacker_news` 
+)
+, remove_useless_data AS (
+SELECT *
+FROM rename_column
+WHERE posted_at IS NOT NULL 
+  AND is_deleted IS NULL
+  AND is_dead IS NULL 
+  AND hackernew_user_id IS NOT NULL 
+)
+
+SELECT *
+FROM remove_useless_data
