@@ -1,0 +1,65 @@
+Sample data of Iowa Liquor Sales.
+Original table: bigquery-public-data.iowa_liquor_sales.sales
+Doc: https://console.cloud.google.com/marketplace/product/iowa-department-of-commerce/iowa-liquor-sales
+
+CREATE OR REPLACE TABLE `vit-lam-data.public_data_sample.iowa_liquor_sales` 
+  LIKE `bigquery-public-data.iowa_liquor_sales.sales`
+  AS (
+    SELECT * FROM `bigquery-public-data.iowa_liquor_sales.sales`
+    TABLESAMPLE SYSTEM (7 PERCENT)
+    ORDER BY date, invoice_and_item_number
+  )
+
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m5!1m4!4m3!1shieu-la-bi!2spublic_data_cleansed!3siowa_liquor_sales&authuser=1
+
+WITH rename_column AS ( 
+SELECT 
+  invoice_and_item_number
+  ,date AS order_date
+  ,store_number
+  ,store_name
+  ,city AS store_city
+  ,county AS store_county
+  ,category AS category_number
+  ,category_name
+  ,vendor_number
+  ,vendor_name
+  ,item_number
+  ,item_description
+  ,state_bottle_retail AS wholesale_price_per_bottle
+  ,bottles_sold AS sold_bottles
+  ,sale_dollars AS order_amount
+  ,volume_sold_liters
+FROM `vit-lam-data.public_data_sample.iowa_liquor_sales`
+) 
+, cast_type AS (
+SELECT 
+  invoice_and_item_number
+  ,order_date
+  ,CAST(store_number AS INTEGER) AS store_number
+  ,store_name
+  ,store_city
+  ,store_county
+  ,CAST(REPLACE(category_number ,'.0','') AS INTEGER) AS category_number
+  ,category_name
+  ,CAST(REPLACE(vendor_number, '.0', '') AS INTEGER) AS vendor_number
+  ,vendor_name
+  ,item_number
+  ,item_description
+  ,CAST(wholesale_price_per_bottle AS NUMERIC) AS wholesale_price_per_bottle
+  ,sold_bottles
+  ,CAST(order_amount AS NUMERIC) AS order_amount
+  ,CAST(volume_sold_liters AS NUMERIC) AS volume_sold_liters
+FROM rename_column
+)
+
+SELECT  *
+  , CASE WHEN STRPOS(store_name , ' #') <> 0 THEN SPLIT(store_name , ' #')[0] 
+  ELSE SPLIT(store_name , ' /')[0]
+  END AS company_name
+FROM cast_type
+
+  
+
+
+
