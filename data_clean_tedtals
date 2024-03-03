@@ -1,0 +1,22 @@
+
+WITH rename_column AS (
+SELECT 
+ title AS ted_talk_title
+  , author
+  , date
+  , views
+  , likes
+  , link
+FROM `vit-lam-data.kaggle.ted_talks`
+)
+, cast_type AS (
+SELECT * EXCEPT(date)
+  , PARSE_DATE('%B %Y', date) AS date
+FROM rename_column
+)
+
+SELECT *
+  , DATE '2022-02-01' AS scraped_date
+  , DATE_DIFF('2022-02-01',date, MONTH) AS month_since_published
+  , ROUND(views/ DATE_DIFF('2022-03-01',date, MONTH),-3) AS month_views_since_published
+FROM cast_type
