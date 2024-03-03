@@ -1,3 +1,6 @@
+Source of the dataset: https://www.kaggle.com/datasets/biminhc/tiki-books-dataset
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m5!1m4!4m3!1shieu-la-bi!2skaggle_cleansed!3stiki_book_comments&authuser=1
+
 WITH rename_column AS (
 SELECT 
   comment_id AS tiki_comment_id
