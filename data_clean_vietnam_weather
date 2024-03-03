@@ -1,3 +1,6 @@
+Source of the dataset: https://www.kaggle.com/datasets/vanviethieuanh/vietnam-weather-data
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&ws=!1m5!1m4!4m3!1shieu-la-bi!2skaggle_cleansed!3svietnam_weather_data&authuser=1
+
 WITH rename_colume AS (
 SELECT 
   province
