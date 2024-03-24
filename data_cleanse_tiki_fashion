@@ -1,0 +1,202 @@
+Source of the dataset:  https://www.kaggle.com/datasets/michaelminhpham/vietnamese-tiki-e-commerce-dataset
+Link Big Query: https://console.cloud.google.com/bigquery?project=hieu-la-bi&authuser=1&ws=!1m8!1m3!3m2!1svit-lam-data!2skaggle_tiki_fashion_products!1m3!8m2!1s700478244041!2sbce2f9e737aa4e00b84fb36c5442056f
+
+WITH union_data AS ( 
+ SELECT 
+  'Backpacks_suitecases' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_backpacks_suitcases` 
+
+UNION ALL
+
+SELECT 
+  'fashion_accessories' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_fashion_accessories`
+
+UNION ALL
+
+SELECT 
+  'men_bags' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_men_bags`
+
+UNION ALL 
+
+SELECT 
+  'men_shoes' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_men_shoes`
+
+UNION ALL 
+
+SELECT 
+  'women_bags' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_women_bags`
+
+UNION ALL 
+
+SELECT 
+  'women_shoes' AS root_categoty
+  , int64_field_0
+  , id
+  , name
+  , description
+  , original_price
+  , price
+  , fulfillment_type
+  , brand
+  , review_count
+  , rating_average
+  , favourite_count
+  , pay_later
+  , current_seller
+  , date_created
+  , number_of_images
+  , vnd_cashback
+  , has_video
+  , category
+  , quantity_sold
+FROM `vit-lam-data.kaggle_tiki_fashion_products.vietnamese_tiki_products_women_shoes`
+)
+, rename_column AS (
+SELECT 
+  id AS tiki_product_id
+  , name AS product_name
+  , price
+  , brand AS brand_name
+  , current_seller AS seller_name
+  , review_count AS count_reviews
+  , favourite_count AS count_favourites
+  , rating_average AS average_rating
+  , quantity_sold  
+  , vnd_cashback
+  , category
+  , root_categoty
+  , date_created AS days_created
+FROM union_data 
+)
+, cast_type AS (
+SELECT * EXCEPT(average_rating)
+  , CAST(average_rating AS NUMERIC) AS average_rating
+FROM rename_column
+)
+, deduplicate AS (
+SELECT DISTINCT *
+FROM cast_type
+)
+, handle_null AS (
+SELECT * EXCEPT(average_rating) 
+  , NULLIF(average_rating, 0) AS average_raing
+FROM deduplicate 
+)
+, cleanse_value AS (
+SELECT * EXCEPT(brand_name)
+  , TRIM(brand_name) AS brand_name
+FROM handle_null
+)
+, enrich AS (
+SELECT *
+  ,DATE '2023-09-19' AS scaped_date
+  ,DATE_ADD (DATE '2023-09-19' , INTERVAL -days_created DAY) AS created_day
+  , quantity_sold * price AS estimated_revenue
+  , ROUND(quantity_sold * price / 1000000,1) AS estimated_revenue_mil
+FROM cleanse_value
+)
+
+SELECT *
+FROM enrich
+
+
+
