@@ -198,5 +198,28 @@ FROM cleanse_value
 SELECT *
 FROM enrich
 
+>> Data model
+WITH summary AS (
+SELECT  
+  seller_name
+  , SUM(quantity_sold) AS quantity_sold
+  , SUM(estimated_revenue) AS estimated_revenue
+  , COUNT(*) AS count_product
+  , COUNT( CASE
+    WHEN quantity_sold >20 THEN tiki_product_id
+    WHEN estimated_revenue > 1000000 THEN tiki_product_id 
+    WHEN count_reviews >= 10 AND average_raing > 4 THEN tiki_product_id 
+     END) AS count_qualified_products
+  , SUM(average_raing * count_reviews)/SUM(count_reviews) AS avg_rating
+  , MIN(created_day) AS first_product_date
+  , DATE_DIFF(MIN(scaped_date),MIN(created_day),MONTH)/12 AS months_on_tiki
+FROM `hieu-la-bi.kaggle_cleansed.tiki_fashion` 
+GROUP BY 1
+)
+
+SELECT *
+  , ROUND(count_qualified_products/count_product,4) AS qualified_product_percent
+FROM summary
+ORDER BY 2 DESC
 
 
