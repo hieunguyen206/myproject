@@ -1,1 +1,32 @@
 
+WITH cleansed_data AS (
+SELECT *
+FROM `hieu-la-bi.kaggle_cleansed.hanoi_housing`
+WHERE 
+  ngay >= '2020-06-01'
+  AND quan NOT IN (
+      SELECT quan
+      FROM `hieu-la-bi.kaggle_cleansed.hanoi_housing`
+      GROUP BY 1
+      HAVING COUNT (*) <100) 
+  AND loai_hinh_nha_o <> 'Unidentified'
+  AND so_tang <> 'Unidentified'
+  AND so_phong_ngu NOT IN ('nhiều hơn 10 phòng', 'Unidentified')
+  AND dien_tich_number <= 200
+  AND gia_trieu_vnd <= 15000
+)
+
+SELECT quan
+  , COUNT(*) AS so_luong_bat_dong_san
+  , ROUND(AVG(gia_m2_number)/1000000) AS trung_binh_gia_m2_trieu_vnd
+  , ROUND(AVG(gia_trieu_vnd)) AS trung_binh_gia_trieu_vnd
+  , ROUND(AVG(CAST(REPLACE(so_phong_ngu, ' phòng','') AS INTEGER)),1) AS trung_binh_so_phong_ngu
+  , COUNT(CASE WHEN dien_tich_number BETWEEN 40 AND 80 THEN id END) AS sl_bds_dien_tich_40_80
+FROM cleansed_data
+GROUP BY 1
+ORDER BY 2 DESC
+
+
+
+
+
