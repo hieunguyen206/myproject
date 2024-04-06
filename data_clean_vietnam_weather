@@ -62,3 +62,19 @@ SELECT
   ,cloud_percent
 FROM enrich
 ORDER BY 1,2
+
+
+
+>> DATA MODEL
+SELECT 
+  province
+  , DATE_TRUNC(date,MONTH) AS month
+  , ROUND(AVG(rain_amount_mm)) AS avg_rain_amount_mm
+  , ROUND(AVG(cloud_percent)) AS avg_cloud_percent
+  , MIN(min_temperature) AS min_temperature
+  , MAX(max_temperature) AS max_temperature
+  , ROUND(AVG(min_temperature)) AS avg_min_temperature
+  , ROUND(AVG(max_temperature)) AS avg_max_temperature
+FROM `hieu-la-bi.kaggle_cleansed.vietnam_weather_data` 
+GROUP BY 1,2
+ORDER BY 1,2
