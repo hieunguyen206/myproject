@@ -52,14 +52,72 @@ SELECT
   ,CAST(volume_sold_liters AS NUMERIC) AS volume_sold_liters
 FROM rename_column
 )
+, rank_to_duplicate AS (
+SELECT 
+  *
+  , ROW_NUMBER() OVER (PARTITION BY store_number ORDER BY order_date DESC) AS store_number_dedup_rank
+  , ROW_NUMBER() OVER (PARTITION BY category_number ORDER BY order_date DESC) AS category_number_dedup_rank
+  , ROW_NUMBER() OVER (PARTITION BY vendor_number ORDER BY order_date DESC) AS vendor_number_dedup_rank
+  , ROW_NUMBER() OVER (PARTITION BY item_number ORDER BY order_date DESC) AS item_number_dedup_rank
+FROM cast_type
+)
+, store AS (
+SELECT 
+  store_number
+  , store_name 
+  , store_city
+  , store_county
+FROM rank_to_duplicate
+WHERE store_number_dedup_rank =1
+) 
+, category AS (
+SELECT 
+  category_number
+  , category_name 
+FROM rank_to_duplicate
+WHERE category_number_dedup_rank =1
+) 
+, vendor AS (
+SELECT 
+  vendor_number
+  , vendor_name 
+FROM rank_to_duplicate
+WHERE vendor_number_dedup_rank =1
+)   
+, item AS (
+SELECT 
+  item_number
+  , item_description 
+FROM rank_to_duplicate
+WHERE item_number_dedup_rank =1
+)   
+, deduplicate AS (
+SELECT 
+  iowa_liquor_sales.invoice_and_item_number
+  ,iowa_liquor_sales.order_date
+  ,iowa_liquor_sales.store_number
+  ,store.store_name
+  ,store.store_city
+  ,store.store_county
+  ,iowa_liquor_sales.category_number
+  ,category.category_name
+  ,iowa_liquor_sales.vendor_number
+  ,vendor.vendor_name
+  ,iowa_liquor_sales.item_number
+  ,item.item_description
+  ,iowa_liquor_sales.wholesale_price_per_bottle
+  ,iowa_liquor_sales.sold_bottles
+  ,iowa_liquor_sales.order_amount
+  ,iowa_liquor_sales.volume_sold_liters
+FROM cast_type AS iowa_liquor_sales
+LEFT JOIN store USING (store_number)
+LEFT JOIN category USING (category_number)
+LEFT JOIN vendor USING (vendor_number)
+LEFT JOIN item USING (item_number)
+)
 
 SELECT  *
   , CASE WHEN STRPOS(store_name , ' #') <> 0 THEN SPLIT(store_name , ' #')[0] 
   ELSE SPLIT(store_name , ' /')[0]
   END AS company_name
-FROM cast_type
-
-  
-
-
-
+FROM deduplicate
